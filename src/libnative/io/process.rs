@@ -191,7 +191,7 @@ impl Drop for Process {
     }
 }
 
-fn pipe() -> IoResult<(file::FileDesc, file::FileDesc)> {
+pub fn pipe() -> IoResult<(file::FileDesc, file::FileDesc)> {
     #[cfg(unix)] use ERROR = libc::EMFILE;
     #[cfg(windows)] use ERROR = libc::WSAEMFILE;
     struct Closer { fd: libc::c_int }
