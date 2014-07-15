@@ -585,7 +585,7 @@ impl TcpAcceptor {
                 c::WSA_INFINITE as u64
             } else {
                 let now = ::io::timer::now();
-                if self.deadline < now {0} else {now - self.deadline}
+                if self.deadline < now {0} else {self.deadline - now}
             };
             let ret = unsafe {
                 c::WSAWaitForMultipleEvents(2, events.as_ptr(), libc::FALSE,
@@ -599,7 +599,6 @@ impl TcpAcceptor {
                 c::WSA_WAIT_EVENT_0 => break,
                 n => assert_eq!(n, c::WSA_WAIT_EVENT_0 + 1),
             }
-            println!("woke up");
 
             let mut wsaevents: c::WSANETWORKEVENTS = unsafe { mem::zeroed() };
             let ret = unsafe {
@@ -613,7 +612,19 @@ impl TcpAcceptor {
             } {
                 -1 if util::wouldblock() => {}
                 -1 => return Err(os::last_error()),
-                fd => return Ok(TcpStream::new(Inner::new(fd))),
+
+                // Accepted sockets inherit the same properties as the caller,
+                // so we need to deregister our event and switch the socket back
+                // to blocking mode
+                fd => {
+                    let stream = TcpStream::new(Inner::new(fd));
+                    let ret = unsafe {
+                        c::WSAEventSelect(fd, events[1], 0)
+                    };
+                    if ret != 0 { return Err(os::last_error()) }
+                    try!(util::set_nonblocking(fd, false));
+                    return Ok(stream)
+                }
             }
         }
 
