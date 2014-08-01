@@ -93,6 +93,7 @@
 
 
 #include <stdarg.h>
+#include <stdint.h>
 
 /* Nb: this file might be included in a file compiled with -ansi.  So
    we can't use C++ style "//" comments nor the "asm" keyword (instead
@@ -257,12 +258,12 @@ typedef
   __extension__                                                   \
   ({volatile unsigned int _zzq_args[6];                           \
     volatile unsigned int _zzq_result;                            \
-    _zzq_args[0] = (unsigned int)(_zzq_request);                  \
-    _zzq_args[1] = (unsigned int)(_zzq_arg1);                     \
-    _zzq_args[2] = (unsigned int)(_zzq_arg2);                     \
-    _zzq_args[3] = (unsigned int)(_zzq_arg3);                     \
-    _zzq_args[4] = (unsigned int)(_zzq_arg4);                     \
-    _zzq_args[5] = (unsigned int)(_zzq_arg5);                     \
+    _zzq_args[0] = (uintptr_t)(_zzq_request);                     \
+    _zzq_args[1] = (uintptr_t)(_zzq_arg1);                        \
+    _zzq_args[2] = (uintptr_t)(_zzq_arg2);                        \
+    _zzq_args[3] = (uintptr_t)(_zzq_arg3);                        \
+    _zzq_args[4] = (uintptr_t)(_zzq_arg4);                        \
+    _zzq_args[5] = (uintptr_t)(_zzq_arg5);                        \
     __asm__ volatile(__SPECIAL_INSTRUCTION_PREAMBLE               \
                      /* %EDX = client_request ( %EAX ) */         \
                      "xchgl %%ebx,%%ebx"                          \
